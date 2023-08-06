@@ -3,6 +3,9 @@ nvidia triton 을 이용한 NLP binary classifier 모델 서버 구축
  - 준비물 : onnx 모델 <br>
    : (model_respository/curse/{model_name}.onnx 이름으로 존재해야함.)
 
+### 예시 모델 : 욕설 검출 모델(curse-detection)
+ - kcbert를 욕설데이터로 fine-turning한 모델
+
 ### triton dokcer image 다운로드
 ```bash
 docker pull nvcr.io/nvidia/tritonserver:23.07-py3
