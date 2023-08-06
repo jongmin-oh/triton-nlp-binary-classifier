@@ -14,9 +14,9 @@ nvidia triton 을 이용한 NLP binary classifier 모델 서버 구축
 python 이라는 고질적인 속도 문제와, 현재는 CPU만 사용하고 있지만 나중에 GPU로 넘어갈때의 용이성(다이나믹배치 등)아
 고려되면서 triton 서버를 따로 분리해서 사용하는 게 좋을 것 같다는 생각을 했다.
 
-무엇보다도 카카오브레인 블로그에서 비교한 자료를 보고난 후 생각이 바뀌었다.
-(https://tech.kakaopay.com/post/model-serving-framework/)
+무엇보다도 카카오페이 블로그에서 비교한 자료를 보고난 후 생각이 바뀌었다.
 ~~~
+[카카오페이 기술 블로그](https://tech.kakaopay.com/post/model-serving-framework/)
 
 ### 예시 모델 : 욕설 검출 모델(curse-detection)
  - kcbert를 욕설데이터로 fine-turning한 모델
