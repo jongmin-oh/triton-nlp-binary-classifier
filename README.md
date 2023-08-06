@@ -1,6 +1,7 @@
 # triton-nlp-binary-classifier
 nvidia triton 을 이용한 NLP binary classifier 모델 서버 구축
- - 준비물 : onnx 모델
+ - 준비물 : onnx 모델 <br>
+   : (model_respository/curse/{model_name}.onnx 이름으로 존재해야함.)
 
 ### triton dokcer image 다운로드
 ```bash
