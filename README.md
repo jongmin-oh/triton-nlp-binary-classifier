@@ -22,7 +22,7 @@ triton 서버를 따로 분리해서 사용하는게 좋을 것 같다는 생각
 ### 예시 모델 : 욕설 검출 모델(curse-detection)
  - kcbert를 욕설데이터로 fine-turning한 모델
 
-### triton dokcer image 다운로드
+### triton dokcer image pull
 ```bash
 docker pull nvcr.io/nvidia/tritonserver:23.07-py3
 ```
