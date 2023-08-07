@@ -94,5 +94,5 @@ class CurseDetector:
 
 if __name__ == "__main__":
     with CurseDetector() as detector:
-        print(detector.predict("씨발"))
+        print(detector.predict("씨발")) # 0.98042375
 ```
