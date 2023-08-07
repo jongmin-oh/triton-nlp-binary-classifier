@@ -1,10 +1,10 @@
 from typing import Final
-from tritonclient.http import InferenceServerClient, InferInput
-import numpy as np
-from transformers import AutoTokenizer
 import asyncio
 
-client = InferenceServerClient(url="localhost:8000")
+import numpy as np
+
+from tritonclient.http import InferenceServerClient, InferInput
+from transformers import AutoTokenizer
 
 MAX_LENGTH: Final[int] = 128
 
@@ -15,11 +15,11 @@ class CurseDetector:
         self.tokenizer = AutoTokenizer.from_pretrained("beomi/kcbert-base")
         self.url = "localhost:8000"
 
-    def __enter__(self):
+    async def __aenter__(self):
         self.client = InferenceServerClient(url=self.url)
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
         self.client.close()
 
     async def _request(self, sentence: str) -> np.ndarray:
@@ -41,7 +41,7 @@ class CurseDetector:
             input_data[i].set_data_from_numpy(bert_inputs[name])
 
         # async_stream_infer 메소드를 사용하여 비동기 요청 보내기
-        output = client.async_infer(
+        output = self.client.async_infer(
             model_name="curse",
             inputs=input_data,
             headers={"Content-Type": "application/json"},
@@ -58,5 +58,10 @@ class CurseDetector:
 
 
 if __name__ == "__main__":
-    detector = CurseDetector()
-    print(asyncio.run(detector.predict("씨발")))
+
+    async def run_prediction():
+        async with CurseDetector() as detector:
+            result = await detector.predict("씨발")
+            print(result)
+
+    asyncio.run(run_prediction())

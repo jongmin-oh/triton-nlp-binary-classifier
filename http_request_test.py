@@ -6,8 +6,6 @@ import numpy as np
 
 from transformers import AutoTokenizer
 
-client = InferenceServerClient(url="localhost:8000")
-
 MAX_LENGTH: Final[int] = 128
 
 
@@ -44,7 +42,7 @@ class CurseDetector:
             input_data[i].set_data_from_numpy(bert_inputs[name])
 
         # 추론 요청 보내기
-        output = client.infer(
+        output = self.client.infer(
             model_name="curse",
             inputs=input_data,
             headers={"Content-Type": "application/json"},
