@@ -1,4 +1,3 @@
-# Todo
 from typing import Final
 import numpy as np
 from tritonclient.grpc import InferenceServerClient, InferInput, InferRequestedOutput
