@@ -35,27 +35,31 @@ docker run --rm -p8000:8000 -p8001:8001 -p8002:8002 -v ${PWD}/model_repository:/
 
 ### request
 ```python
-import json
 from typing import Final
-
-import requests
+from tritonclient.http import InferenceServerClient
+from tritonclient.http import InferInput
 
 import numpy as np
+
 from transformers import AutoTokenizer
 
 MAX_LENGTH: Final[int] = 128
 
-# 요청 URL 설정
-url = "http://localhost:8000/v2/models/curse/versions/1/infer"
-headers = {"Content-Type": "application/json"}
-
 
 class CurseDetector:
     def __init__(self):
+        self.client = None
         self.tokenizer = AutoTokenizer.from_pretrained("beomi/kcbert-base")
-        self.timeout = 5
+        self.url = "localhost:8000"
 
-    def _request_triton(self, sentence: str):
+    def __enter__(self):
+        self.client = InferenceServerClient(url=self.url)
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.client.close()
+
+    def _request(self, sentence: str) -> np.ndarray:
         bert_inputs = self.tokenizer(
             sentence,
             padding="max_length",
@@ -63,51 +67,32 @@ class CurseDetector:
             max_length=MAX_LENGTH,
             return_tensors="np",
         )
-        # 입력 데이터 준비
-        data = {
-            "inputs": [
-                {
-                    "name": "input_ids",
-                    "shape": [1, MAX_LENGTH],
-                    "datatype": "INT64",
-                    "data": bert_inputs["input_ids"].tolist(),
-                },
-                {
-                    "name": "attention_mask",
-                    "shape": [1, MAX_LENGTH],
-                    "datatype": "INT64",
-                    "data": bert_inputs["attention_mask"].tolist(),
-                },
-                {
-                    "name": "token_type_ids",
-                    "shape": [1, MAX_LENGTH],
-                    "datatype": "INT64",
-                    "data": bert_inputs["token_type_ids"].tolist(),
-                },
-            ]
-        }
+        # 입력 데이터 생성
+        input_data = [
+            InferInput("input_ids", bert_inputs["input_ids"].shape, "INT64"),
+            InferInput("attention_mask", bert_inputs["attention_mask"].shape, "INT64"),
+            InferInput("token_type_ids", bert_inputs["token_type_ids"].shape, "INT64"),
+        ]
 
-        # 요청
-        response = requests.post(
-            url, headers=headers, data=json.dumps(data), timeout=self.timeout
+        # 입력 데이터에 값을 설정
+        for i, name in enumerate(["input_ids", "attention_mask", "token_type_ids"]):
+            input_data[i].set_data_from_numpy(bert_inputs[name])
+
+        # 추론 요청 보내기
+        output = self.client.infer(
+            model_name="curse",
+            inputs=input_data,
+            headers={"Content-Type": "application/json"},
         )
-
-        # 응답 확인
-        if response.status_code == 200:
-            output_data = response.json()
-            return output_data
-        else:
-            print("오류 발생:", response.status_code, response.text)
+        return output.as_numpy("output_0")[0]
 
     def predict(self, sentence: str):
-        response = self._request_triton(sentence)
-        logit = response["outputs"][0]["data"]
+        logit = self._request(sentence)
         softmax = np.exp(logit) / np.sum(np.exp(logit), axis=-1, keepdims=True)
         return softmax[1]
 
 
 if __name__ == "__main__":
-    detector = CurseDetector()
-    print(detector.predict("씨발"))
-
+    with CurseDetector() as detector:
+        print(detector.predict("씨발"))
 ```
