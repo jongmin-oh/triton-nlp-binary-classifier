@@ -28,8 +28,14 @@ docker pull nvcr.io/nvidia/tritonserver:23.07-py3
 ```
 
 ### docker run (only-cpu)
-```
-docker run --rm -p8000:8000 -p8001:8001 -p8002:8002 -v ${PWD}/model_repository:/models nvcr.io/nvidia/tritonserver:23.07-py3 tritonserver --model-repository=/model
+```bash
+docker run --rm \
+  -p 8000:8000 \
+  -p 8001:8001 \
+  -p 8002:8002 \
+  -v ${PWD}/model_repository:/models \
+  nvcr.io/nvidia/tritonserver:23.07-py3 \
+  tritonserver --model-repository=/model
 ```
 
 ***
